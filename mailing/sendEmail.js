@@ -54,18 +54,16 @@ const sendWelcomeEmail = async (userEmail, userName) => {
   });
 };
 
-const sendAchievementEmail = async (
-  userEmail,
-  userName,
-  aiResponse
-) => {
+const sendAchievementEmail = async (userEmail, userName, aiResponse) => {
   const subject = "Psst! Got a message for you";
   const html = `
-        <h1>Hey there, ${userName}!</h1>
+        <h1>Welcome, ${userName}!</h1>
+        <p>Thank you for joining our Weekwise!. We're excited to have you on board!</p>
+        <p>Here is what to expect weekly :)</p>
         <p>${aiResponse}</p>
-        
+        <p>You are doing well, ${userName}! Thank you for choosing to be part of this!.</p>
+        <p>If you have any questions, feel free to reach out to our support team.</p>
       `;
-
   return sendEmail({
     to: userEmail,
     subject,

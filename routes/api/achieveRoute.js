@@ -41,7 +41,7 @@ Write a motivational response that provides encouragement, actionable advice, an
       aiResponse = aiResponse.replace(/\n\n/g, " ");
 
       res.status(200).json({ success: true, message: aiResponse });
-      return sendAchievementEmail(userEmail, userName, aiResponse)
+      return sendAchievementEmail(userEmail, userName, aiResponse);
     } catch (error) {
       console.error("Error with OpenAI API:", error);
       res.status(500).json({
