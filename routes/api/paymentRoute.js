@@ -1,5 +1,6 @@
 const express = require("express");
 const paypal = require("@paypal/checkout-server-sdk");
+const { User } = require("../../models");
 
 // PayPal Environment Configuration
 const environment =
@@ -14,9 +15,11 @@ const environment =
       );
 
 const client = new paypal.core.PayPalHttpClient(environment);
+
 const paymentRoutes = () => {
   const paymentRouter = express.Router();
-  //   Create payment
+
+  // Create payment
   paymentRouter.route("/create-payment").post(async (req, res) => {
     const { amount, currency, description } = req.body;
 
@@ -57,7 +60,43 @@ const paymentRoutes = () => {
 
     try {
       const capture = await client.execute(request);
-      res.status(200).json({ success: true, capture: capture.result });
+
+      // Extract payment details
+      const paymentDetails =
+        capture.result.purchase_units[0].payments.captures[0];
+      const dateTime = new Date(paymentDetails.create_time);
+      const transactionId = paymentDetails.id;
+      // const amount =
+      //   paymentDetails.amount.value + " " + paymentDetails.amount.currency_code;
+
+      // Extract payer email
+      const payerEmail = capture.result.payer.email_address;
+
+      // Update the database with the paymentID and updatedAt for the user with matching email
+      const [updated] = await User.update(
+        {
+          paymentID: transactionId,
+          updatedAt: dateTime,
+        },
+        { where: { email: payerEmail } }
+      );
+
+      if (updated) {
+        res.status(200).json({
+          success: true,
+          capture: {
+            transactionId,
+            dateTime,
+            payerEmail,
+            message: "User paymentID and updatedAt updated successfully",
+          },
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "User with the provided email not found",
+        });
+      }
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, error: err.message });
