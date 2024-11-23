@@ -8,7 +8,14 @@ const {generateAndSendEmail} = require('./mailing/sendEmail');
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+const corsOptions = {
+  origin: 'https://www.weekwise.me',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 
 // Route handler
 app.use(require("./routes"));
@@ -30,7 +37,7 @@ cron.schedule("* * * * *", async () => {
 });
 
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log("server is running on port::", PORT);
