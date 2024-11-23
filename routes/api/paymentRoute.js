@@ -37,8 +37,8 @@ const paymentRoutes = () => {
         },
       ],
       application_context: {
-        return_url: "https://weekwise.vercel.app/",
-        cancel_url: "https://weekwise.vercel.app/",
+        return_url: "https://www.weekwise.me/",
+        cancel_url: "https://www.weekwise.me/",
       },
     });
 

@@ -4,8 +4,8 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.addColumn('Users', 'previous_messages', {
-      type: Sequelize.ARRAY(Sequelize.TEXT), // Array of strings
-      allowNull: true, // Existing rows will have NULL initially
+      type: Sequelize.ARRAY(Sequelize.TEXT),
+      allowNull: true,
     });
     
   },
