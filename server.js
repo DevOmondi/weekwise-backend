@@ -9,6 +9,17 @@ const {generateAndSendEmail} = require('./mailing/sendEmail');
 const app = express();
 app.use(express.json());
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://www.weekwise.me');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+
 const corsOptions = {
   origin: 'https://www.weekwise.me',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
