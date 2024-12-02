@@ -9,35 +9,35 @@ const { sendDueEmails } = require("./mailing/sendEmail");
 const app = express();
 
 // Allowed origins
-const allowedOrigins = [
-  "https://weekwise.me",
-  "https://www.weekwise.me",
-  "http://localhost:3000",
-];
+// const allowedOrigins = [
+//   "https://weekwise.me",
+//   "https://www.weekwise.me",
+//   "http://localhost:3000",
+// ];
 
 // CORS middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-  );
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Max-Age", "86400");
+// app.use((req, res, next) => {
+//   const origin = req.headers.origin;
+//   if (allowedOrigins.includes(origin)) {
+//     res.setHeader("Access-Control-Allow-Origin", origin);
+//   }
+//   res.setHeader(
+//     "Access-Control-Allow-Methods",
+//     "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+//   );
+//   res.setHeader(
+//     "Access-Control-Allow-Headers",
+//     "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+//   );
+//   res.setHeader("Access-Control-Allow-Credentials", "true");
+//   res.setHeader("Access-Control-Max-Age", "86400");
 
-  // Handle preflight requests
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  next();
-});
+//   // Handle preflight requests
+//   if (req.method === "OPTIONS") {
+//     return res.status(200).end();
+//   }
+//   next();
+// });
 
 app.use(cors());
 app.use(express.json());
@@ -62,7 +62,7 @@ cron.schedule("* * * * *", async () => {
   await sendDueEmails();
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log("server is running on port::", PORT);
