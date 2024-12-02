@@ -8,14 +8,40 @@ const { sendDueEmails } = require("./mailing/sendEmail");
 
 const app = express();
 
-const corsOptions = {
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+// Allowed origins
+const allowedOrigins = [
+  "https://weekwise.me",
+  "https://www.weekwise.me",
+  "http://localhost:3000",
+];
 
-app.use('*',cors(corsOptions));
+// CORS middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Max-Age", "86400");
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
+
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Route handler
 app.use(require("./routes"));
@@ -33,10 +59,10 @@ app.get("/", (req, res) => {
 // Schedule the job to run every minute
 cron.schedule("* * * * *", async () => {
   console.log("Running email job at", new Date().toISOString());
-  await sendDueEmails()
+  await sendDueEmails();
 });
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log("server is running on port::", PORT);
