@@ -7,25 +7,26 @@ require("dotenv").config();
 const { sendDueEmails } = require("./mailing/sendEmail");
 
 const app = express();
-app.use(express.json());
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://weekwise.me");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
+
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "https://weekwise.me");
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   if (req.method === "OPTIONS") {
+//     return res.sendStatus(200);
+//   }
+//   next();
+// });
 
 const corsOptions = {
-  origin: "https://weekwise.me",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: ["https://weekwise.me", "http://localhost:3000", "https://www.weekwise.me"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
+app.use(express.json());
 
 // Route handler
 app.use(require("./routes"));
