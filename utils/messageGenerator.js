@@ -3,10 +3,18 @@ const OpenAI = require("openai");
 class MessageGenerator {
   constructor() {
     this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    this.tokenBucket = { tokens: 10000, lastRefill: Date.now(), refillRate: 1000 };
+    this.tokenBucket = {
+      tokens: 10000,
+      lastRefill: Date.now(),
+      refillRate: 1000,
+    };
     this.fallbackTemplates = {
-      encouraging: ["You're off to a great start! Keep going, and you'll reach your goal in no time."],
-      analytical: ["Studies show consistent effort leads to success. You're on the right track!"],
+      encouraging: [
+        "You're off to a great start! Keep going, and you'll reach your goal in no time.",
+      ],
+      analytical: [
+        "Studies show consistent effort leads to success. You're on the right track!",
+      ],
     };
   }
 
@@ -33,20 +41,29 @@ class MessageGenerator {
         model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Generate Week ${index + 1}'s message for ${context.userName}, who wants to ${context.goal}.` },
+          {
+            role: "user",
+            content: `Generate Week ${index + 1}'s message for ${
+              context.userName
+            }, who wants to ${context.goal}. Return only plain text that is suitable for direct use in an email body.`,
+          },
         ],
         temperature: 0.7,
       });
 
-      return completion.choices[0].message.content;
+      return this.cleanMessage(completion.choices[0].message.content);
     } catch (error) {
       console.error("Error generating message:", error);
       return this.generateFallbackMessage(context, index);
     }
   }
 
+  cleanMessage(message) {
+    return message.replace(/\n+/g, " ").trim();
+  }
+
   async generateAllMessages(context) {
-    const batchSize = 12; 
+    const batchSize = 17;
     const messages = [];
 
     for (let i = 0; i < 52; i += batchSize) {
@@ -91,18 +108,26 @@ class MessageGenerator {
   }
 
   getMessageStyle(index) {
-    const styles = ["encouraging", "analytical", "storytelling", "humorous", "challenging", "reflective"];
+    const styles = [
+      "encouraging",
+      "analytical",
+      "storytelling",
+      "humorous",
+      "challenging",
+      "reflective",
+    ];
     return styles[index % styles.length];
   }
 }
 
-const messageGenerator = new MessageGenerator();
+module.exports = new MessageGenerator();
 
-async function generateAllMessagesHandler(context) {
-  return await messageGenerator.generateAllMessages(context);
-}
 
-module.exports = generateAllMessagesHandler;
+// async function generateAllMessagesHandler(context) {
+//   return await messageGenerator.generateAllMessages(context);
+// }
+
+// module.exports = generateAllMessagesHandler;
 
 // const OpenAI = require("openai");
 
