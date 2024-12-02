@@ -17,13 +17,21 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     email: DataTypes.STRING,
     prompt: DataTypes.STRING,
-    previous_messages: {
+    paymentID: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    scheduled_messages: {
       type: DataTypes.ARRAY(DataTypes.TEXT), 
       allowNull: true,
       defaultValue: [],
     },
-    paymentID: {
-      type: DataTypes.STRING,
+    subscriptionDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    nextMessageDate: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
   }, {

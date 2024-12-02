@@ -1,6 +1,8 @@
 const express = require("express");
 const paypal = require("@paypal/checkout-server-sdk");
-const { User } = require("../../models");
+const messageGenerator = require("../../utils/messageGenerator");
+const createUser = require("../../controllers/userControllers");
+const sendWelcomeEmail = require("../../mailing/sendEmail")
 
 // PayPal Environment Configuration
 const environment =
@@ -19,7 +21,7 @@ const client = new paypal.core.PayPalHttpClient(environment);
 const paymentRoutes = () => {
   const paymentRouter = express.Router();
 
-  // Create payment
+  // Create payment route
   paymentRouter.route("/create-payment").post(async (req, res) => {
     const { amount, currency, description } = req.body;
 
@@ -37,8 +39,8 @@ const paymentRoutes = () => {
         },
       ],
       application_context: {
-        return_url: "https://www.weekwise.me/",
-        cancel_url: "https://www.weekwise.me/",
+        return_url: "https://weekwise.me/",
+        cancel_url: "https://weekwise.me/",
       },
     });
 
@@ -51,9 +53,10 @@ const paymentRoutes = () => {
     }
   });
 
-  // Capture payment
+  // Capture payment route
   paymentRouter.route("/capture-payment").post(async (req, res) => {
-    const { orderId } = req.body;
+    const { orderId, formData } = req.body;
+    const { name, email, goal } = formData;
 
     const request = new paypal.orders.OrdersCaptureRequest(orderId);
     request.requestBody({});
@@ -62,41 +65,54 @@ const paymentRoutes = () => {
       const capture = await client.execute(request);
 
       // Extract payment details
-      const paymentDetails =
-        capture.result.purchase_units[0].payments.captures[0];
-      const dateTime = new Date(paymentDetails.create_time);
-      const transactionId = paymentDetails.id;
-      // const amount =
-      //   paymentDetails.amount.value + " " + paymentDetails.amount.currency_code;
+      const paymentDetails = capture.result.purchase_units[0].payments.captures[0];
+      const subscriptionDate = new Date(paymentDetails.create_time);
+      const paymentID = paymentDetails.id;
 
-      // Extract payer email
-      const payerEmail = capture.result.payer.email_address;
+      // Calculate next message date (one day after subscription)
+      const nextMessageDate = new Date(subscriptionDate);
+      nextMessageDate.setDate(nextMessageDate.getDate() + 1);
 
-      // Update the database with the paymentID and updatedAt for the user with matching email
-      const [updated] = await User.update(
-        {
-          paymentID: transactionId,
-          updatedAt: dateTime,
-        },
-        { where: { email: payerEmail } }
+      // Generate context for message generation
+      const context = {
+        userName: name,
+        goal,
+      };
+
+      // Generate the 52 messages
+      const scheduledMessages = await messageGenerator.generateAllMessages(context);
+
+      // Create new user with all required fields
+      await createUser(
+        name,
+        email,
+        goal,
+        paymentID,
+        JSON.stringify(scheduledMessages),
+        subscriptionDate,
+        nextMessageDate
       );
-
-      if (updated) {
-        res.status(200).json({
-          success: true,
-          capture: {
-            transactionId,
-            dateTime,
-            payerEmail,
-            message: "User paymentID and updatedAt updated successfully",
-          },
-        });
-      } else {
-        res.status(404).json({
-          success: false,
-          message: "User with the provided email not found",
-        });
+      
+      // welcomeEmailContext
+      const welcomeEmailContext = {
+        userName: name,
+        userEmail: email,
+        goal,
+        nextMessageDate
       }
+      // Send welcome email
+      await sendWelcomeEmail(welcomeEmailContext)
+
+      // Send success response
+      res.status(200).json({
+        success: true,
+        capture: {
+          transactionId: paymentID,
+          nextMessageDate,
+          message: "Payment processed and user created successfully",
+        },
+      });
+
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, error: err.message });

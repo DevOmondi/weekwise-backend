@@ -1,13 +1,26 @@
 const { User } = require("../models");
 
-const createUser = async (userName, userEmail, prompt, previousMessages) => {
+const createUser = async (
+  name,
+  email,
+  goal,
+  paymentID,
+  scheduledMessages,
+  subscriptionDate,
+  nextMessageDate
+) => {
   const user = await User.create({
-    name: userName,
-    email: userEmail.toLowerCase(),
-    prompt: prompt,
-    previous_messages: previousMessages,
+    name: name,
+    email: email.toLowerCase(),
+    prompt: goal,
+    paymentID: paymentID,
+    scheduled_messages: scheduledMessages,
+    subscriptionDate: subscriptionDate,
+    nextMessageDate: nextMessageDate,
   });
+  
   console.log(user.toJSON());
+  return user;
 };
 
 module.exports = createUser;
