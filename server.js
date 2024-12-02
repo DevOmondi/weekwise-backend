@@ -54,10 +54,10 @@ app.get("/", (req, res) => {
 });
 
 // Schedule the job to run every minute
-// cron.schedule("* * * * *", async () => {
-//   console.log("Running email job at", new Date().toISOString());
-//   await sendDueEmails();
-// });
+cron.schedule("* * * * *", async () => {
+  console.log("Running email job at", new Date().toISOString());
+  await sendDueEmails();
+});
 
 const PORT = process.env.PORT || 5001;
 
