@@ -88,7 +88,7 @@ const paymentRoutes = () => {
         email,
         goal,
         paymentID,
-        JSON.stringify(scheduledMessages),
+        scheduledMessages,
         subscriptionDate,
         nextMessageDate
       );
