@@ -1,22 +1,27 @@
 const { User } = require("../models");
 
 const createUser = async (
-  name,
+  dbUsername,
   email,
   goal,
-  paymentID,
+  subscriptionId,
   scheduledMessages,
   subscriptionDate,
-  nextMessageDate
+  nextMessageDate,
+  isSubscribed,
+  subscriptionStatus
+  
 ) => {
   const user = await User.create({
-    name: name,
+    name: dbUsername,
     email: email.toLowerCase(),
     prompt: goal,
-    paymentID: paymentID,
+    subscriptionId: subscriptionId,
     scheduled_messages: scheduledMessages,
     subscriptionDate: subscriptionDate,
     nextMessageDate: nextMessageDate,
+    isSubscribed: isSubscribed,
+    subscriptionStatus: subscriptionStatus
   });
   
   console.log(user.toJSON());

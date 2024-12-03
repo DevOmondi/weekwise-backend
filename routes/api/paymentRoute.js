@@ -2,7 +2,7 @@ const express = require("express");
 const paypal = require("@paypal/checkout-server-sdk");
 const messageGenerator = require("../../utils/messageGenerator");
 const createUser = require("../../controllers/userControllers");
-const sendWelcomeEmail = require("../../mailing/sendEmail")
+const { sendWelcomeEmail } = require("../../mailing/sendEmail");
 
 // PayPal Environment Configuration
 const environment =
@@ -21,55 +21,126 @@ const client = new paypal.core.PayPalHttpClient(environment);
 const paymentRoutes = () => {
   const paymentRouter = express.Router();
 
-  // Create payment route
-  paymentRouter.route("/create-payment").post(async (req, res) => {
-    const { amount, currency, description } = req.body;
+  // Simulate subscription activation
+  // paymentRouter.route("/simulate-subscription").post(async (req, res) => {
+  //   const { formData } = req.body;
+  //   const { name, email, goal } = formData;
 
-    const request = new paypal.orders.OrdersCreateRequest();
-    request.prefer("return=representation");
-    request.requestBody({
-      intent: "CAPTURE",
-      purchase_units: [
-        {
-          amount: {
-            currency_code: currency || "USD",
-            value: amount,
-          },
-          description: description || "One-time payment",
-        },
-      ],
-      application_context: {
-        return_url: "https://weekwise.me/",
-        cancel_url: "https://weekwise.me/",
-      },
-    });
+  //   try {
+  //     // Create mock subscription data
+  //     const mockSubscriptionId = `TEST_SUB_${Date.now()}`;
+  //     const subscriptionDate = new Date();
+  //     const nextMessageDate = new Date(subscriptionDate);
+  //     nextMessageDate.setDate(nextMessageDate.getDate() + 1);
 
-    try {
-      const order = await client.execute(request);
-      res.status(200).json({ success: true, orderId: order.result.id });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, error: err.message });
-    }
-  });
+  //        // Define mock subscription details
+  //   const subscriptionDetails = {
+  //     status: 'ACTIVE', // Mock status
+  //   };
 
-  // Capture payment route
-  paymentRouter.route("/capture-payment").post(async (req, res) => {
-    const { orderId, formData } = req.body;
+  //     // Generate context for message generation
+  //     const context = {
+  //       userName: name,
+  //       goal,
+  //     };
+
+  //     // Generate the 52 messages
+  //     const scheduledMessages = await messageGenerator.generateAllMessages(context);
+
+  //     // Create new user with test subscription
+  //     const subscriptionStatus = subscriptionDetails.status
+  //     const subscriptionId = mockSubscriptionId
+  //     const dbUsername = name;
+  //     const isSubscribed = true
+  //     await createUser(
+  //       dbUsername,
+  //       email,
+  //       goal,
+  //       subscriptionId,
+  //       scheduledMessages,
+  //       subscriptionDate,
+  //       nextMessageDate,
+  //       isSubscribed, // isSubscription
+  //       subscriptionStatus// subscriptionStatus
+  //     );
+
+  //     // Send welcome email
+  //     const welcomeEmailContext = {
+  //       userName: name,
+  //       userEmail: email,
+  //       goal,
+  //       nextMessageDate
+  //     };
+  //     await sendWelcomeEmail(welcomeEmailContext);
+
+  //     // Send success response
+  //     res.status(200).json({
+  //       success: true,
+  //       subscription: {
+  //         subscriptionId: mockSubscriptionId,
+  //         status: 'ACTIVE',
+  //         nextMessageDate,
+  //         message: "Test subscription activated successfully",
+  //       },
+  //     });
+
+  //   } catch (err) {
+  //     console.error(err);
+  //     res.status(500).json({ success: false, error: err.message });
+  //   }
+  // });
+
+  // Simulate subscription status changes
+  // paymentRouter.route("/simulate-subscription-update").post(async (req, res) => {
+  //   const { subscriptionId, newStatus } = req.body;
+
+  //   try {
+  //     // Validate status
+  //     const validStatuses = ['ACTIVE', 'CANCELLED', 'SUSPENDED'];
+  //     if (!validStatuses.includes(newStatus)) {
+  //       throw new Error('Invalid subscription status');
+  //     }
+
+  //     // Update user subscription status
+  //     // Implement your database update logic here
+  //     // await User.findOneAndUpdate(
+  //     //   { subscriptionId },
+  //     //   { subscriptionStatus: newStatus },
+  //     //   { new: true }
+  //     // );
+
+  //     res.status(200).json({
+  //       success: true,
+  //       message: `Subscription ${subscriptionId} status updated to ${newStatus}`,
+  //     });
+
+  //   } catch (err) {
+  //     console.error(err);
+  //     res.status(500).json({ success: false, error: err.message });
+  //   }
+  // });
+
+  // Activate subscription route
+  paymentRouter.route("/activate-subscription").post(async (req, res) => {
+    const { subscriptionId, formData } = req.body;
     const { name, email, goal } = formData;
 
-    const request = new paypal.orders.OrdersCaptureRequest(orderId);
-    request.requestBody({});
-
     try {
-      const capture = await client.execute(request);
+      // Verify subscription with PayPal
+      const request = new paypal.subscriptions.SubscriptionsGetRequest(
+        subscriptionId
+      );
+      const subscription = await client.execute(request);
 
-      // Extract payment details
-      const paymentDetails = capture.result.purchase_units[0].payments.captures[0];
-      const subscriptionDate = new Date(paymentDetails.create_time);
-      const paymentID = paymentDetails.id;
+      // Check subscription status
+      if (subscription.result.status !== "ACTIVE") {
+        throw new Error("Subscription is not active");
+      }
 
-      // Calculate next message date (one day after subscription)
+      const subscriptionDetails = subscription.result;
+      const subscriptionDate = new Date(subscriptionDetails.start_time);
+
+      // Calculate next message date (one day after subscription start)
       const nextMessageDate = new Date(subscriptionDate);
       nextMessageDate.setDate(nextMessageDate.getDate() + 1);
 
@@ -80,44 +151,102 @@ const paymentRoutes = () => {
       };
 
       // Generate the 52 messages
-      const scheduledMessages = await messageGenerator.generateAllMessages(context);
+      const scheduledMessages = await messageGenerator.generateAllMessages(
+        context
+      );
 
       // Create new user with all required fields
+      const subscriptionStatus = subscriptionDetails.status;
+      const dbUsername = name;
+      const isSubscribed = true;
+
       await createUser(
-        name,
+        dbUsername,
         email,
         goal,
-        paymentID,
+        subscriptionId,
         scheduledMessages,
         subscriptionDate,
-        nextMessageDate
+        nextMessageDate,
+        isSubscribed,
+        subscriptionStatus
       );
-      
+
       // welcomeEmailContext
       const welcomeEmailContext = {
         userName: name,
         userEmail: email,
         goal,
-        nextMessageDate
-      }
+        nextMessageDate,
+      };
+
       // Send welcome email
-      await sendWelcomeEmail(welcomeEmailContext)
+      await sendWelcomeEmail(welcomeEmailContext);
 
       // Send success response
       res.status(200).json({
         success: true,
-        capture: {
-          transactionId: paymentID,
+        subscription: {
+          subscriptionId,
+          status: subscriptionDetails.status,
           nextMessageDate,
-          message: "Payment processed and user created successfully",
+          message: "Subscription activated and user created successfully",
         },
       });
-
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, error: err.message });
     }
   });
+
+  // Webhook route to handle subscription updates
+  // paymentRouter.route("/subscription-webhook").post(async (req, res) => {
+  //   try {
+  //     const webhookEvent = req.body;
+  //     const eventType = webhookEvent.event_type;
+  //     const resourceId = webhookEvent.resource.id;
+
+  //     switch (eventType) {
+  //       case "BILLING.SUBSCRIPTION.CANCELLED":
+  //         // Handle subscription cancellation
+  //         // Update user subscription status in database
+  //         await updateUserSubscriptionStatus(resourceId, "CANCELLED");
+  //         break;
+
+  //       case "BILLING.SUBSCRIPTION.SUSPENDED":
+  //         // Handle subscription suspension (e.g., failed payment)
+  //         await updateUserSubscriptionStatus(resourceId, "SUSPENDED");
+  //         break;
+
+  //       case "BILLING.SUBSCRIPTION.RENEWED":
+  //         // Handle successful renewal
+  //         await updateUserSubscriptionStatus(resourceId, "ACTIVE");
+  //         break;
+  //     }
+
+  //     res.status(200).send("Webhook processed successfully");
+  //   } catch (err) {
+  //     console.error("Webhook Error:", err);
+  //     res.status(500).json({ error: err.message });
+  //   }
+  // });
+
+  // // Helper function to update user subscription status
+  // async function updateUserSubscriptionStatus(subscriptionId, status) {
+  //   // Implement this function to update the user's subscription status in your database
+  //   // This will depend on your database schema and ORM
+  //   try {
+  //     // Example:
+  //     // await User.findOneAndUpdate(
+  //     //   { subscriptionId },
+  //     //   { subscriptionStatus: status },
+  //     //   { new: true }
+  //     // );
+  //   } catch (err) {
+  //     console.error("Error updating subscription status:", err);
+  //     throw err;
+  //   }
+  // }
 
   return paymentRouter;
 };

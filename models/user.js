@@ -17,8 +17,12 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     email: DataTypes.STRING,
     prompt: DataTypes.STRING,
-    paymentID: {
+    subscriptionId: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isSubscribed: {
+      type: DataTypes.BOOLEAN,
       allowNull: true,
     },
     scheduled_messages: {
@@ -30,10 +34,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
+    subscriptionStatus: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     nextMessageDate: {
       type: DataTypes.DATE,
       allowNull: true,
     },
+
   }, {
     sequelize,
     modelName: 'User',

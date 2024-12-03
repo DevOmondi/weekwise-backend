@@ -32,12 +32,12 @@ const sendEmail = async ({ to, subject, html, text }) => {
 };
 
 // Weekly email template
-const sendWeeklyEmail = async (userEmail, userName, aiResponse) => {
+const sendWeeklyEmail = async (userEmail, userName, nextMessage) => {
   const subject = "It's us, weekwise 😉!";
   const html = `
         <h1>Hey There, ${userName}!</h1>
         <p>Your journey with us is truly valued, and we’re thrilled to have you on board. 🎉</p>
-        <p>${aiResponse}</p>
+        <p>${nextMessage}</p>
         <p>If you have any questions, feel free to reach out to our support team.</p>
       `;
 
@@ -79,8 +79,8 @@ const sendWelcomeEmail = (welcomeEmailContext) => {
     : null;
   const subject = "Welcome to WeekWise! Your journey begins today";
   const html = `
-  <h1>Hi ${welcomeEmailContext.userName},</h1>
-  <p> Thank you for joining WeekWise! We're excited to help you ${(welcomeEmailContext.goal).toLowerCase()}.</p>
+  <h1>Hi ${welcomeEmailContext.userName},</h1></br>
+  <p> Thank you for joining WeekWise! We're excited to help you ${(welcomeEmailContext.goal).toLowerCase()}.</p> </br>
   <p>
   What's next:
     • Your first coaching message arrives tomorrow at ${formattedTime}
@@ -180,6 +180,8 @@ const sendDueEmails = async () => {
         nextMessageDate: {
           [Op.lte]: currentDate,
         },
+        isSubscribed: true,
+        subscriptionStatus: "ACTIVE",
         scheduled_messages: {
           [Op.ne]: null,
         },
@@ -187,7 +189,7 @@ const sendDueEmails = async () => {
     });
 
     if (!users || users.length === 0) {
-      console.log("No messages due at current time.");
+      console.log("No messages due at the current time.");
       return;
     }
 
@@ -200,8 +202,8 @@ const sendDueEmails = async () => {
       }
 
       try {
-        // Parse scheduled messages
-        const messages = JSON.parse(scheduled_messages || "[]");
+        // Scheduled messages are already an array of strings
+        const messages = scheduled_messages || [];
 
         if (messages.length === 0) {
           console.log(`No remaining messages for user: ${userEmail}`);
@@ -224,7 +226,7 @@ const sendDueEmails = async () => {
           nextMessageDate.setDate(nextMessageDate.getDate() + 7);
 
           // Update user record
-          user.scheduled_messages = JSON.stringify(updatedMessages);
+          user.scheduled_messages = updatedMessages;
           user.nextMessageDate = nextMessageDate;
           await user.save();
 
