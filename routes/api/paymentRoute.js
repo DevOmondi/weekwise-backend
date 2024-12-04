@@ -120,67 +120,67 @@ const paymentRoutes = () => {
   //   }
   // });
 
-  const generateAccessToken = async () => {
-    try {
-      const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
-      const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
+  // const generateAccessToken = async () => {
+  //   try {
+  //     const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
+  //     const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 
-      if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
-        throw "Paypal credentials not found";
-      }
+  //     if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+  //       throw "Paypal credentials not found";
+  //     }
 
-      const auth = Buffer.from(
-        PAYPAL_CLIENT_ID + ":" + PAYPAL_CLIENT_SECRET
-      ).toString("base64");
-      console.log("Auth is::", { auth });
+  //     const auth = Buffer.from(
+  //       PAYPAL_CLIENT_ID + ":" + PAYPAL_CLIENT_SECRET
+  //     ).toString("base64");
+  //     console.log("Auth is::", { auth });
 
-      const url = `${process.env.PAYPAL_BASE_TEST}/v1/oauth2/token`;
+  //     const url = `${process.env.PAYPAL_BASE_TEST}/v1/oauth2/token`;
 
-      const response = await fetch(url, {
-        method: "POST",
-        body: "grant_type=client_credentials",
-        headers: {
-          Authorization: `Bearer ${auth}`,
-        },
-      });
+  //     const response = await fetch(url, {
+  //       method: "POST",
+  //       body: "grant_type=client_credentials",
+  //       headers: {
+  //         Authorization: `Bearer ${auth}`,
+  //       },
+  //     });
 
-      const data = await response.json();
-      return data.access_token;
-    } catch (error) {
-      console.log("Error occured generating token::", error);
-      throw error;
-    }
-  };
+  //     const data = await response.json();
+  //     return data;
+  //   } catch (error) {
+  //     console.log("Error occured generating token::", error);
+  //     throw error;
+  //   }
+  // };
 
-  // Test in sandbox
-  paymentRouter.route("/test-create-subscription").post(async (req, res) => {
-    // Sandbox
-    const accessToken = await generateAccessToken();
-    console.log("Still getting auth token::", { accessToken });
-    const { plan_name } = req.body;
-    const url = `${process.env.PAYPAL_BASE_TEST}/v1/billing/subscriptions`;
+  // // Test in sandbox
+  // paymentRouter.route("/test-create-subscription").post(async (req, res) => {
+  //   // Sandbox
+  //   const accessToken = await generateAccessToken();
+  //   console.log("Still getting auth token::", { accessToken });
+  //   const { plan_name } = req.body;
+  //   const url = `${process.env.PAYPAL_BASE_TEST}/v1/billing/subscriptions`;
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Prefer: "return=representation",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        plan_name,
-        application_context: {
-          user_action: "SUBSCRIBE_NOW",
-        },
-      }),
-    });
+  //   const response = await fetch(url, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Accept: "application/json",
+  //       Prefer: "return=representation",
+  //       Authorization: `Bearer ${accessToken}`,
+  //     },
+  //     body: JSON.stringify({
+  //       plan_name,
+  //       application_context: {
+  //         user_action: "SUBSCRIBE_NOW",
+  //       },
+  //     }),
+  //   });
 
-    const data = response.json;
-    res
-      .status(200)
-      .json({ succes: true, PaypalSubscription: data, status: data.status });
-  });
+  //   const data = response.json;
+  //   res
+  //     .status(200)
+  //     .json({ success: true, PaypalSubscription: data, status: data.status });
+  // });
 
   // Activate subscription route
   paymentRouter.route("/activate-subscription").post(async (req, res) => {
