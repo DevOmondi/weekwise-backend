@@ -69,7 +69,7 @@ const sendTrialEmail = async (userEmail, userName, trialMessage) => {
 };
 
 const sendWelcomeEmail = (welcomeEmailContext) => {
-  const dateTime = welcomeEmailContext.nextMessageDate
+  const dateTime = welcomeEmailContext.nextMessageDate;
   const dateObj = dateTime ? new Date(dateTime) : null;
   const formattedTime = dateObj
     ? dateObj.toLocaleTimeString(undefined, {
@@ -79,19 +79,30 @@ const sendWelcomeEmail = (welcomeEmailContext) => {
     : null;
   const subject = "Welcome to WeekWise! Your journey begins today";
   const html = `
-  <h1>Hi ${welcomeEmailContext.userName},</h1></br>
-  <p> Thank you for joining WeekWise! We're excited to help you ${(welcomeEmailContext.goal).toLowerCase()}.</p> </br>
-  <p>
-  What's next:
-    • Your first coaching message arrives tomorrow at ${formattedTime}
-    • You'll receive weekly guidance for the next 52 weeks
-    • Each message includes personalized advice and actionable steps
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h1 style="color: #36b552ff; margin-bottom: 20px;">Hi ${welcomeEmailContext.userName},</h1>
+      
+      <p style="color: #000000; font-size: 16px; line-height: 1.5;">
+        Thank you for joining WeekWise! We're excited to help you ${welcomeEmailContext.goal.toLowerCase()}.
+      </p>
 
-    Got questions? Just reply to this email.
+      <h2 style="color: #36b552ff; margin: 25px 0 15px;">What's next:</h2>
+      <ul style="color: #000000; font-size: 16px; line-height: 1.6;">
+        <li>Your first coaching message arrives tomorrow at ${formattedTime}</li>
+        <li>You'll receive weekly guidance for the next 52 weeks</li>
+        <li>Each message includes personalized advice and actionable steps</li>
+      </ul>
 
-    We're honored to be part of your journey,
-    The WeekWise Team
-  </p>`;
+      <p style="color: #000000; font-size: 16px; margin: 25px 0;">
+        Got questions? Just reply to this email.
+      </p>
+
+      <p style="color: #000000; font-size: 16px; margin-top: 30px;">
+        We're honored to be part of your journey,<br>
+        The WeekWise Team
+      </p>
+    </div>
+  `;
   return sendEmail({
     to: welcomeEmailContext.userEmail,
     subject,

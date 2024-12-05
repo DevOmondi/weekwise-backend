@@ -27,31 +27,51 @@ const paymentRoutes = () => {
   //   const { name, email, goal } = formData;
 
   //   try {
-  //     // Create mock subscription data
+  //     // Create mock subscription data first
   //     const mockSubscriptionId = `TEST_SUB_${Date.now()}`;
   //     const subscriptionDate = new Date();
   //     const nextMessageDate = new Date(subscriptionDate);
   //     nextMessageDate.setDate(nextMessageDate.getDate() + 1);
 
-  //        // Define mock subscription details
-  //   const subscriptionDetails = {
-  //     status: 'ACTIVE', // Mock status
-  //   };
+  //     const subscriptionDetails = {
+  //       status: "ACTIVE",
+  //     };
 
-  //     // Generate context for message generation
+  //     // Send success response immediately after subscription details are ready
+  //     res.status(200).json({
+  //       success: true,
+  //       subscription: {
+  //         subscriptionId: mockSubscriptionId,
+  //         status: "ACTIVE",
+  //         nextMessageDate,
+  //         message: "Test subscription activated successfully",
+  //       },
+  //     });
+
+  //     const welcomeEmailContext = {
+  //       userName: name,
+  //       userEmail: email,
+  //       goal,
+  //       nextMessageDate,
+  //     };
+  //     await sendWelcomeEmail(welcomeEmailContext);
+
+  //     // Continue with remaining operations asynchronously
   //     const context = {
   //       userName: name,
   //       goal,
   //     };
 
-  //     // Generate the 52 messages
-  //     const scheduledMessages = await messageGenerator.generateAllMessages(context);
+  //     const scheduledMessages = await messageGenerator.generateAllMessages(
+  //       context
+  //     );
 
   //     // Create new user with test subscription
-  //     const subscriptionStatus = subscriptionDetails.status
-  //     const subscriptionId = mockSubscriptionId
+  //     const subscriptionStatus = subscriptionDetails.status;
+  //     const subscriptionId = mockSubscriptionId;
   //     const dbUsername = name;
-  //     const isSubscribed = true
+  //     const isSubscribed = true;
+
   //     await createUser(
   //       dbUsername,
   //       email,
@@ -60,30 +80,9 @@ const paymentRoutes = () => {
   //       scheduledMessages,
   //       subscriptionDate,
   //       nextMessageDate,
-  //       isSubscribed, // isSubscription
-  //       subscriptionStatus// subscriptionStatus
+  //       isSubscribed,
+  //       subscriptionStatus
   //     );
-
-  //     // Send welcome email
-  //     const welcomeEmailContext = {
-  //       userName: name,
-  //       userEmail: email,
-  //       goal,
-  //       nextMessageDate
-  //     };
-  //     await sendWelcomeEmail(welcomeEmailContext);
-
-  //     // Send success response
-  //     res.status(200).json({
-  //       success: true,
-  //       subscription: {
-  //         subscriptionId: mockSubscriptionId,
-  //         status: 'ACTIVE',
-  //         nextMessageDate,
-  //         message: "Test subscription activated successfully",
-  //       },
-  //     });
-
   //   } catch (err) {
   //     console.error(err);
   //     res.status(500).json({ success: false, error: err.message });
@@ -208,6 +207,28 @@ const paymentRoutes = () => {
       const nextMessageDate = new Date(subscriptionDate);
       nextMessageDate.setDate(nextMessageDate.getDate() + 1);
 
+      // Send success response
+      res.status(200).json({
+        success: true,
+        subscription: {
+          subscriptionId,
+          status: subscriptionDetails.status,
+          nextMessageDate,
+          message: "Subscription activated and user created successfully",
+        },
+      });
+
+      // welcomeEmailContext
+      const welcomeEmailContext = {
+        userName: name,
+        userEmail: email,
+        goal,
+        nextMessageDate,
+      };
+
+      // Send welcome email
+      await sendWelcomeEmail(welcomeEmailContext);
+
       // Generate context for message generation
       const context = {
         userName: name,
@@ -235,28 +256,6 @@ const paymentRoutes = () => {
         isSubscribed,
         subscriptionStatus
       );
-
-      // welcomeEmailContext
-      const welcomeEmailContext = {
-        userName: name,
-        userEmail: email,
-        goal,
-        nextMessageDate,
-      };
-
-      // Send welcome email
-      await sendWelcomeEmail(welcomeEmailContext);
-
-      // Send success response
-      res.status(200).json({
-        success: true,
-        subscription: {
-          subscriptionId,
-          status: subscriptionDetails.status,
-          nextMessageDate,
-          message: "Subscription activated and user created successfully",
-        },
-      });
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, error: err.message });
