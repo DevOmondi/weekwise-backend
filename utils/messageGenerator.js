@@ -45,7 +45,9 @@ class MessageGenerator {
             role: "user",
             content: `Generate Week ${index + 1}'s message for ${
               context.userName
-            }, who wants to ${context.goal}. Return only plain text that is suitable for direct use in an email body.`,
+            }, who wants to ${
+              context.goal
+            }. Return only plain text that is suitable for direct use in an email body.`,
           },
         ],
         temperature: 0.7,
@@ -95,7 +97,9 @@ class MessageGenerator {
     const weekNumber = index + 1;
 
     return `You are a supportive coach for Weekwise. 
-    Week: ${weekNumber}, Goal: ${context.goal}, Phase: ${phase}, Style: ${style}`;
+    Week: ${weekNumber}, Goal: ${context.goal}, Phase: ${phase}, Style: ${style}.
+    Your task is to craft an email message for Week ${weekNumber} that is supportive and aligns with the given style and phase. 
+    Always sign off messages with exactly "Your Weekwise coach" and no other names, titles, or variations. Do not include any additional information about yourself.`;
   }
 
   getWeekPhase(index) {
@@ -121,7 +125,6 @@ class MessageGenerator {
 }
 
 module.exports = new MessageGenerator();
-
 
 // async function generateAllMessagesHandler(context) {
 //   return await messageGenerator.generateAllMessages(context);

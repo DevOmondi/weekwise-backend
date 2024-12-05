@@ -34,12 +34,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
 // Weekly email template
 const sendWeeklyEmail = async (userEmail, userName, nextMessage) => {
   const subject = "It's us, weekwise 😉!";
-  const html = `
-        <h1>Hey There, ${userName}!</h1>
-        <p>Your journey with us is truly valued, and we’re thrilled to have you on board. 🎉</p>
-        <p>${nextMessage}</p>
-        <p>If you have any questions, feel free to reach out to our support team.</p>
-      `;
+  const html = `<p>${nextMessage}</p>`;
 
   return sendEmail({
     to: userEmail,
@@ -80,10 +75,12 @@ const sendWelcomeEmail = (welcomeEmailContext) => {
   const subject = "Welcome to WeekWise! Your journey begins today";
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <h1 style="color: #36b552ff; margin-bottom: 20px;">Hi ${welcomeEmailContext.userName},</h1>
+      <h1 style="color: #36b552ff; margin-bottom: 20px;">Hi ${
+        welcomeEmailContext.userName
+      },</h1>
       
       <p style="color: #000000; font-size: 16px; line-height: 1.5;">
-        Thank you for joining WeekWise! We're excited to help you ${welcomeEmailContext.goal.toLowerCase()}.
+        Thank you for joining WeekWise! We're excited to help you with your goal: ${welcomeEmailContext.goal.toLowerCase()}.
       </p>
 
       <h2 style="color: #36b552ff; margin: 25px 0 15px;">What's next:</h2>
@@ -110,75 +107,6 @@ const sendWelcomeEmail = (welcomeEmailContext) => {
     text: `You are a hero, ${welcomeEmailContext.userName}! We're honored to be part of your journey`,
   });
 };
-// Function to generate and send email
-// const generateAndSendEmail = async () => {
-//   try {
-//     const currentDate = new Date();
-
-//     const oneWeekAgo = new Date(currentDate);
-//     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-//     const exactStartTime = oneWeekAgo.toISOString();
-//     const exactEndTime = currentDate.toISOString();
-
-//     // Find all users who made payments exactly one week ago
-//     const users = await User.findAll({
-//       where: {
-//         updatedAt: {
-//           [Op.between]: [exactStartTime, exactEndTime],
-//         },
-//         paymentID: {
-//           [Op.ne]: null,
-//         },
-//       },
-//     });
-
-//     if (!users || users.length === 0) {
-//       console.log(
-//         "No users found who paid exactly one week ago at the current time."
-//       );
-//       return;
-//     }
-
-//     for (const user of users) {
-//       const {
-//         name: userName,
-//         email: userEmail,
-//         prompt,
-//         previous_messages,
-//       } = user;
-
-//       if (!userEmail || !userName) {
-//         console.log(`Skipping user due to missing data:`, user);
-//         continue;
-//       }
-
-//       const previousMessages = Array.isArray(previous_messages)
-//         ? previous_messages
-//         : JSON.parse(previous_messages || "[]");
-
-//       // Generate the motivational message using messageGenerator
-//       const aiResponse = await messageGenerator.generateMessage({
-//         userName,
-//         goal: prompt,
-//         weekNumber: weekNumber + 1,
-//         previousMessages,
-//         totalUsers: await User.count(),
-//         similarGoalUsers: await User.count({ where: { prompt } }),
-//       });
-
-//       previousMessages.push(aiResponse);
-//       user.previous_messages = JSON.stringify(previousMessages);
-//       await user.save();
-
-//       // Send the email
-//       await sendWeeklyEmail(userEmail, userName, aiResponse);
-//       console.log(`Weekly email sent to ${userEmail}`);
-//     }
-//   } catch (error) {
-//     console.error("Error in generateAndSendEmail:", error);
-//   }
-// };
 
 // Function to send out due emails
 const sendDueEmails = async () => {
