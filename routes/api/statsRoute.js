@@ -10,8 +10,8 @@ const statsRoutes = () => {
       const userCount = await User.count({
         where: {
           isSubscribed: true,
-          subscriptionStatus: 'ACTIVE'
-        }
+          subscriptionStatus: "ACTIVE",
+        },
       });
 
       res.status(200).json({
@@ -26,6 +26,31 @@ const statsRoutes = () => {
       });
     }
   });
+
+  statsRouter.route("/users-details").get(verifyToken, async (req, res) => {
+    try {
+      // Fetch all user details
+      const users = await User.findAll();
+
+      // Add a derived progress property
+      const usersWithProgress = users.map((user) => {
+        const scheduledMessagesLength = user.scheduled_messages
+          ? user.scheduled_messages.length
+          : 52;
+        return {
+          ...user.toJSON(),
+          progress: 52 - scheduledMessagesLength,
+        };
+      });
+
+      
+      return res.status(200).json(usersWithProgress);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      return res.status(500).json({ message: "Failed to fetch users", error });
+    }
+  });
+
   return statsRouter;
 };
 
