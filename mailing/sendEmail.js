@@ -1,14 +1,14 @@
 const { Resend } = require("resend");
-const { OpenAI } = require("openai");
+// const { OpenAI } = require("openai");
 const { User } = require("../models");
 const { Op } = require("sequelize");
-const messageGenerator = require("../utils/messageGenerator");
+// const messageGenerator = require("../utils/messageGenerator");
 require("dotenv").config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  organization: process.env.OPENAI_ORG_ID,
-});
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY,
+//   organization: process.env.OPENAI_ORG_ID,
+// });
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -33,8 +33,17 @@ const sendEmail = async ({ to, subject, html, text }) => {
 
 // Weekly email template
 const sendWeeklyEmail = async (userEmail, userName, nextMessage) => {
-  const subject = "It's us, weekwise 😉!";
-  const html = `<p>${nextMessage}</p>`;
+   // Extract subject and content from the message
+   const extractSubjectAndContent = (message) => {
+    const subjectMatch = message.match(/^Subject:\s*(.*)$/m);
+    const subject = subjectMatch ? subjectMatch[1].trim() : "Weekly Update from Weekwise"; // Default subject
+    const content = message.replace(/^Subject:\s*.*$/m, "").trim(); // Remove subject line and keep content
+    return { subject, content };
+  };
+
+  const { subject, content } = extractSubjectAndContent(fullMessage);
+  // const subject = "It's us, weekwise 😉!";
+  const html = `<p>${content}</p>`;
 
   return sendEmail({
     to: userEmail,

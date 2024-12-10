@@ -1,3 +1,4 @@
+
 const OpenAI = require("openai");
 
 class MessageGenerator {
@@ -96,10 +97,16 @@ class MessageGenerator {
     const style = this.getMessageStyle(index);
     const weekNumber = index + 1;
 
-    return `You are a supportive coach for Weekwise. 
+    return `You are a supportive coach for Weekwise.
     Week: ${weekNumber}, Goal: ${context.goal}, Phase: ${phase}, Style: ${style}.
-    Your task is to craft an email message for Week ${weekNumber} that is supportive and aligns with the given style and phase. 
-    Always sign off messages with exactly "Your Weekwise coach" and no other names, titles, or variations. Do not include any additional information about yourself.`;
+    Your task is to craft an email message for Week ${weekNumber} that is supportive and aligns with the given style and phase.
+      - Include a personal, engaging subject line.
+      - Start with a warm opening acknowledging their progress.
+      - Offer a single actionable insight or guidance tied to their goal.
+      - Include a closing with encouragement for the upcoming week.
+      - Keep the tone optimistic and empathetic.
+      - Sign off as "Your Weekwise coach."
+      `;
   }
 
   getWeekPhase(index) {

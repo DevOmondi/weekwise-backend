@@ -11,8 +11,10 @@ const app = express();
 // Allowed origins
 const allowedOrigins = [
   "https://weekwise.me",
+  "https://admin.weekwise.me",
   "https://www.weekwise.me",
   "http://localhost:3000",
+  "http://localhost:3001"
 ];
 
 // CORS configuration

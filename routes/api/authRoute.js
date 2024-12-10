@@ -11,14 +11,12 @@ const authRoutes = () => {
     try {
       const { email, password } = req.body;
 
-      // Validate input
       if (!email || !password) {
         return res
           .status(400)
           .json({ success: false, message: "Email and password are required" });
       }
 
-      // Check if admin exists
       const admin = await Admin.findOne({ where: { email } });
       if (!admin) {
         return res
@@ -26,7 +24,6 @@ const authRoutes = () => {
           .json({ success: false, message: "Admin not found" });
       }
 
-      // Verify password
       const isPasswordValid = await bcrypt.compare(password, admin.password);
       if (!isPasswordValid) {
         return res

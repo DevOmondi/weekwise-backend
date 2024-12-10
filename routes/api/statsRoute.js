@@ -7,7 +7,12 @@ const statsRoutes = () => {
 
   statsRouter.route("/users-count").get(verifyToken, async (req, res) => {
     try {
-      const userCount = await User.count();
+      const userCount = await User.count({
+        where: {
+          isSubscribed: true,
+          subscriptionStatus: 'ACTIVE'
+        }
+      });
 
       res.status(200).json({
         success: true,
