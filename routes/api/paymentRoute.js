@@ -22,73 +22,73 @@ const paymentRoutes = () => {
   const paymentRouter = express.Router();
 
   // Simulate subscription activation
-  // paymentRouter.route("/simulate-subscription").post(async (req, res) => {
-  //   const { formData } = req.body;
-  //   const { name, email, goal } = formData;
+  paymentRouter.route("/simulate-subscription").post(async (req, res) => {
+    const { formData } = req.body;
+    const { name, email, goal } = formData;
 
-  //   try {
-  //     // Create mock subscription data first
-  //     const mockSubscriptionId = `TEST_SUB_${Date.now()}`;
-  //     const subscriptionDate = new Date();
-  //     const nextMessageDate = new Date(subscriptionDate);
-  //     nextMessageDate.setDate(nextMessageDate.getDate() + 1);
+    try {
+      // Create mock subscription data first
+      const mockSubscriptionId = `TEST_SUB_${Date.now()}`;
+      const subscriptionDate = new Date();
+      const nextMessageDate = new Date(subscriptionDate);
+      nextMessageDate.setDate(nextMessageDate.getDate() + 1);
 
-  //     const subscriptionDetails = {
-  //       status: "ACTIVE",
-  //     };
+      const subscriptionDetails = {
+        status: "ACTIVE",
+      };
 
-  //     // Send success response immediately after subscription details are ready
-  //     if (mockSubscriptionId && nextMessageDate) {
-  //       res.status(200).json({
-  //         success: true,
-  //         subscription: {
-  //           subscriptionId: mockSubscriptionId,
-  //           status: "ACTIVE",
-  //           nextMessageDate,
-  //           message: "Test subscription activated successfully",
-  //         },
-  //       });
-  //     }
-  //     const welcomeEmailContext = {
-  //       userName: name,
-  //       userEmail: email,
-  //       goal,
-  //       nextMessageDate,
-  //     };
-  //     await sendWelcomeEmail(welcomeEmailContext);
+      //  Send success response immediately after subscription details are ready
+      if (mockSubscriptionId && nextMessageDate) {
+        res.status(200).json({
+          success: true,
+          subscription: {
+            subscriptionId: mockSubscriptionId,
+            status: "ACTIVE",
+            nextMessageDate,
+            message: "Test subscription activated successfully",
+          },
+        });
+      }
+      const welcomeEmailContext = {
+        userName: name,
+        userEmail: email,
+        goal,
+        nextMessageDate,
+      };
+      await sendWelcomeEmail(welcomeEmailContext);
 
-  //     // Continue with remaining operations asynchronously
-  //     const context = {
-  //       userName: name,
-  //       goal,
-  //     };
+      // Continue with remaining operations asynchronously
+      const context = {
+        userName: name,
+        goal,
+      };
 
-  //     const scheduledMessages = await messageGenerator.generateAllMessages(
-  //       context
-  //     );
+      const scheduledMessages = await messageGenerator.generateAllMessages(
+        context
+      );
+      console.log(scheduledMessages)
+      // Create new user with test subscription
+      const subscriptionStatus = subscriptionDetails.status;
+      const subscriptionId = mockSubscriptionId;
+      const dbUsername = name;
+      const isSubscribed = true;
 
-  //     // Create new user with test subscription
-  //     const subscriptionStatus = subscriptionDetails.status;
-  //     const subscriptionId = mockSubscriptionId;
-  //     const dbUsername = name;
-  //     const isSubscribed = true;
-
-  //     await createUser(
-  //       dbUsername,
-  //       email,
-  //       goal,
-  //       subscriptionId,
-  //       scheduledMessages,
-  //       subscriptionDate,
-  //       nextMessageDate,
-  //       isSubscribed,
-  //       subscriptionStatus
-  //     );
-  //   } catch (err) {
-  //     console.error(err);
-  //     res.status(500).json({ success: false, error: err.message });
-  //   }
-  // });
+      await createUser(
+        dbUsername,
+        email,
+        goal,
+        subscriptionId,
+        scheduledMessages,
+        subscriptionDate,
+        nextMessageDate,
+        isSubscribed,
+        subscriptionStatus
+      );
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
 
   // Simulate subscription status changes
   // paymentRouter.route("/simulate-subscription-update").post(async (req, res) => {

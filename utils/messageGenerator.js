@@ -1,4 +1,3 @@
-
 const OpenAI = require("openai");
 
 class MessageGenerator {
@@ -48,21 +47,37 @@ class MessageGenerator {
               context.userName
             }, who wants to ${
               context.goal
-            }. Return only plain text that is suitable for direct use in an email body.`,
+            }. Return only plain text suitable for direct use in an email body.`,
           },
         ],
         temperature: 0.7,
       });
 
-      return this.cleanMessage(completion.choices[0].message.content);
+      const content = this.cleanMessage(completion.choices[0].message.content);
+
+      // Simulate subject creation for the message
+      const subject = `Week ${index + 1}: ${this.getMessageStyle(
+        index
+      ).toUpperCase()} Journey`;
+
+      return {
+        weekNumber: index + 1,
+        subject,
+        content,
+      };
     } catch (error) {
       console.error("Error generating message:", error);
-      return this.generateFallbackMessage(context, index);
+      return this.generateFallbackMessageObject(context, index);
     }
   }
 
   cleanMessage(message) {
-    return message.replace(/\n+/g, " ").trim();
+    // Remove the subject line and redundant spaces
+    const cleaned = message
+      .replace(/^Subject:.*?\n/, '')
+      .replace(/\n+/g, ' ') 
+      .trim();
+    return cleaned;
   }
 
   async generateAllMessages(context) {
@@ -84,12 +99,21 @@ class MessageGenerator {
     return messages;
   }
 
-  generateFallbackMessage(context, index) {
+  generateFallbackMessageObject(context, index) {
     const style = this.getMessageStyle(index);
     const templates = this.fallbackTemplates[style] || [];
-    return templates.length > 0
-      ? templates[index % templates.length]
-      : "Keep going! You're doing great.";
+    const content =
+      templates.length > 0
+        ? templates[index % templates.length]
+        : "Keep going! You're doing great.";
+
+    const subject = `Week ${index + 1}: Encouragement`;
+
+    return {
+      weekNumber: index + 1,
+      subject,
+      content,
+    };
   }
 
   createSystemPrompt(context, index) {
@@ -100,13 +124,66 @@ class MessageGenerator {
     return `You are a supportive coach for Weekwise.
     Week: ${weekNumber}, Goal: ${context.goal}, Phase: ${phase}, Style: ${style}.
     Your task is to craft an email message for Week ${weekNumber} that is supportive and aligns with the given style and phase.
-      - Include a personal, engaging subject line.
-      - Start with a warm opening acknowledging their progress.
-      - Offer a single actionable insight or guidance tied to their goal.
-      - Include a closing with encouragement for the upcoming week.
-      - Keep the tone optimistic and empathetic.
-      - Sign off as "Your Weekwise coach."
-      `;
+     SUBJECT LINE REQUIREMENTS:
+- Keep it personal yet intriguing
+- Reflect the week's message style and phase
+- Use action words and emotional appeal
+- Length: 3-7 words
+- Examples based on styles:
+  - Encouraging: "Your Yoga Journey Begins Today! 🌟"
+  - Analytical: "The Science Behind Your First Steps 📊"
+  - Storytelling: "Time to Write Your Yoga Story 📖"
+  - Humorous: "Ready to Get Bendy? Let's Go! 🧘‍♂️"
+  - Challenging: "Your Week 1 Challenge Awaits 💪"
+  - Reflective: "Your Path to Flexibility Starts Here ✨"
+
+STRUCTURAL REQUIREMENTS:
+1. Opening: Personal, acknowledging recent progress or challenges
+2. Body: One clear, actionable insight or technique
+3. Social Element: Meaningful community connection
+4. Closing: Forward-looking encouragement
+5. Length: 150-200 words maximum
+6. Signature: Close with "Your Weekwise Coach" instead of a personal signature
+
+FORMATTING REQUIREMENTS:
+- Use clear paragraph breaks for readability
+- Each main point gets its own paragraph
+- Maximum 2-3 sentences per paragraph
+- Add spacing between greeting, body, and closing
+- Use appropriate emoji sparingly for visual appeal
+
+TONE REQUIREMENTS:
+- Write as if you're a trusted mentor who deeply cares
+- Be conversational yet professional
+- Show genuine understanding of their journey
+- Maintain optimism while acknowledging challenges
+
+ESSENTIAL ELEMENTS:
+- Include one specific action for this week
+- Reference their specific goal naturally
+- Add a touch of behavioral psychology insight
+- Ensure message feels fresh and unique
+
+MANDATORY EXCLUSIONS:
+- No generic motivational quotes
+- No repetition from previous weeks
+- No overwhelming list of tasks
+- No dismissive positivity
+- No rigid prescriptions
+- No customer support references or directions
+
+RESPONSE FORMAT:
+Generate an array of 52 messages in the following JSON format:
+[
+  {
+    "weekNumber": 1,
+    "subject": "subject line here",
+    "content": "message content here"
+  },
+  ...
+]
+
+Each message should progress naturally through the journey, building upon previous weeks while maintaining variety and engagement. Ensure a coherent progression through the phases while varying the style appropriately. Always sign out as Your Weekwise Coach.`;
   }
 
   getWeekPhase(index) {
