@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     },
     scheduled_messages: {
-      type: DataTypes.ARRAY(DataTypes.JSON), 
+      type: DataTypes.ARRAY(DataTypes.JSONB), 
       allowNull: true,
       defaultValue: [],
     },
